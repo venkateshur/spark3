@@ -46,7 +46,9 @@ object Example1 extends App with SparkSessionProvider {
   //take this updated string and put in table properties command
 
   def getPreviousMaxSeqNum(dbName: String, tableName: String, columnName: String): Long = {
-    spark.read.table(s"$dbName.$tableName").select(max(columnName)).collect()(0).getLong(0)
+    val mayBeEmpty = spark.read.table(s"$dbName.$tableName")
+      .select(max(columnName)).collect()
+    if (mayBeEmpty.nonEmpty) mayBeEmpty(0).getLong(0) else 1L
   }
 
   def addSeqNum(inputDs: Dataset[Props], prevValue: Long): Dataset[Props1] = {
